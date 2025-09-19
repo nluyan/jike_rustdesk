@@ -82,6 +82,12 @@ pub fn start(args: &mut [String]) {
         ALLOW_FILE_IO as u8 | ALLOW_SOCKET_IO as u8 | ALLOW_EVAL as u8 | ALLOW_SYSINFO as u8
     )));
     let mut frame = sciter::WindowBuilder::main_window().create();
+    // Determine if this instance is Connection Manager (CM) and should be hidden.
+    let hide_cm_mode = !args.is_empty() && args[0] == "--cm";
+    if hide_cm_mode {
+        // Collapse as early as possible to avoid any visible flash.
+        frame.collapse(true);
+    }
     #[cfg(windows)]
     allow_err!(sciter::set_options(sciter::RuntimeOptions::UxTheming(true)));
     frame.set_title(&crate::get_app_name());
@@ -183,10 +189,9 @@ pub fn start(args: &mut [String]) {
             .unwrap_or("".to_owned()),
         page
     ));
-    let hide_cm = *cm::HIDE_CM.lock().unwrap();
-    if !args.is_empty() && args[0] == "--cm" && hide_cm {
-        // run_app calls expand(show) + run_loop, we use collapse(hide) + run_loop instead to create a hidden window
-        frame.collapse(true);
+
+    // Show others normally; keep CM hidden and just run loop.
+    if hide_cm_mode {
         frame.run_loop();
         return;
     }
